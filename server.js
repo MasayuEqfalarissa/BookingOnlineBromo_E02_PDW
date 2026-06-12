@@ -20,13 +20,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Pastikan folder upload ada di public/uploads
-const uploadDir = path.join(__dirname, 'public/uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// const uploadDir = path.join(__dirname, 'public/uploads');
+// if (!fs.existsSync(uploadDir)) {
+//   fs.mkdirSync(uploadDir, { recursive: true });
+// }
 
 // Inisialisasi Database MySQL XAMPP
-db.initDB();
+// db.initDB();
 
 // Pengaturan Template Engine EJS
 app.set('view engine', 'ejs');
