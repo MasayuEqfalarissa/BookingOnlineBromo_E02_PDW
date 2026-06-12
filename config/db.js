@@ -2,39 +2,40 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  port: process.env.DB_PORT || 4000, // 1. Tambahkan konfigurasi PORT (TiDB menggunakan port 4000)
+  ssl: {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true // 2. WAJIB menggunakan SSL untuk koneksi ke TiDB Cloud aman
+  }
 };
 
 let pool;
 
 async function initDB() {
   try {
-    // 1. Koneksi awal ke MySQL Server untuk memastikan DB ada
-    const connection = await mysql.createConnection(dbConfig);
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'booking_bromo'}\``);
-    await connection.end();
-
-    // 2. Buat pool koneksi ke database yang ditargetkan
+    // Pada TiDB Cloud, database default biasanya sudah otomatis dibuatkan saat registrasi (misal: 'test' atau 'booking_bromo')
+    // Jadi kita langsung membuat pool koneksi ke target database tersebut
     pool = mysql.createPool({
       ...dbConfig,
-      database: process.env.DB_NAME || 'booking_bromo',
+      database: process.env.DB_NAME || 'test', // Sesuaikan dengan nama DB di TiDB, defaultnya 'test'
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0
     });
 
-    console.log(`Terhubung ke database MySQL: ${process.env.DB_NAME || 'booking_bromo'}`);
+    console.log(`Terhubung ke database TiDB Cloud: ${process.env.DB_NAME || 'test'}`);
 
-    // 3. Buat tabel-tabel jika belum ada
+    // Buat tabel-tabel jika belum ada
     await createTables();
     
-    // 4. Masukkan data default (seeding)
+    // Masukkan data default (seeding)
     await seedData();
 
   } catch (error) {
-    console.error('Gagal menginisialisasi database:', error);
+    console.error('Gagal menginisialisasi database TiDB:', error);
     process.exit(1);
   }
 }
@@ -49,7 +50,7 @@ async function createTables() {
       phone VARCHAR(20) NOT NULL,
       role ENUM('admin', 'customer') NOT NULL DEFAULT 'customer',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB;
+    );
   `;
 
   const packagesTable = `
@@ -60,7 +61,7 @@ async function createTables() {
       price_per_person DECIMAL(10, 2) NOT NULL,
       image_url VARCHAR(255) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB;
+    );
   `;
 
   const bookingsTable = `
@@ -76,7 +77,7 @@ async function createTables() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY (package_id) REFERENCES packages(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB;
+    );
   `;
 
   const paymentsTable = `
@@ -90,7 +91,7 @@ async function createTables() {
       status ENUM('pending', 'verified', 'failed') NOT NULL DEFAULT 'pending',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB;
+    );
   `;
 
   await pool.query(usersTable);
@@ -103,7 +104,6 @@ async function createTables() {
 async function seedData() {
   const bcrypt = require('bcryptjs');
 
-  // Check if admin exists
   const [admins] = await pool.query("SELECT * FROM users WHERE role = 'admin'");
   if (admins.length === 0) {
     const hashedPassword = await bcrypt.hash('admin', 10);
@@ -114,7 +114,6 @@ async function seedData() {
     console.log('User Admin default berhasil dibuat (username: admin, pass: admin)');
   }
 
-  // Check if packages exist
   const [packages] = await pool.query("SELECT * FROM packages");
   if (packages.length === 0) {
     const defaultPackages = [
