@@ -1,0 +1,56 @@
+@startuml
+
+|Pelanggan|
+start
+
+:Buka Website Booking Bromo;
+
+if (Sudah Memiliki Akun?) then (Ya)
+:Login;
+else (Tidak)
+:Registrasi Akun;
+:Login;
+endif
+
+:Lihat Paket Wisata & Detail;
+:Melakukan Pemesanan Paket;
+
+|Sistem|
+:Simpan Data Pemesanan;
+:Status Pemesanan = Pending;
+:Tampilkan Informasi Pembayaran;
+
+|Pelanggan|
+:Upload Bukti Pembayaran;
+
+|Sistem|
+:Kirim Notifikasi Pemesanan;
+
+|Admin|
+:Login;
+:Lihat Dashboard Admin;
+:Kelola & Verifikasi Pemesanan;
+
+if (Bukti Pembayaran Valid?) then (Valid)
+
+|Sistem|
+:Update Status = Approved;
+:Terbitkan Konfirmasi / E-Ticket;
+
+else (Tidak Valid)
+
+|Sistem|
+:Update Status = Rejected;
+:Simpan Alasan Penolakan;
+
+endif
+
+|Pelanggan|
+:Lihat Riwayat & Status Pemesanan;
+
+|Admin|
+:Kelola Paket Wisata (CRUD);
+
+stop
+
+@enduml

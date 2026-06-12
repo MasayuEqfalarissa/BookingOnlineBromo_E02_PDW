@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Pelanggan (Customer)" as Customer
+actor "Administrator (Admin)" as Admin
+
+rectangle "Sistem Booking Bromo" {
+  usecase "Registrasi Akun" as UC1
+  usecase "Login" as UC2
+  usecase "Lihat Paket Wisata & Detail" as UC3
+  usecase "Melakukan Pemesanan Paket" as UC4
+  usecase "Upload Bukti Pembayaran" as UC5
+  usecase "Lihat Riwayat & Status Pemesanan" as UC6
+  usecase "Kelola Paket Wisata (CRUD)" as UC7
+  usecase "Kelola & Verifikasi Pemesanan" as UC8
+  usecase "Lihat Dashboard Admin" as UC9
+}
+
+Customer --> UC1
+Customer --> UC2
+Customer --> UC3
+Customer --> UC4
+Customer --> UC5
+Customer --> UC6
+
+Admin --> UC2
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+@endum
