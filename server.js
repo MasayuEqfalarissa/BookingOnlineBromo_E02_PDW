@@ -26,7 +26,7 @@ const PORT = process.env.PORT || 3000;
 // }
 
 // Inisialisasi Database MySQL XAMPP
-// db.initDB();
+db.initDB();
 
 // Pengaturan Template Engine EJS
 app.set('view engine', 'ejs');
