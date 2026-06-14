@@ -1,0 +1,31 @@
+@startuml
+actor Pelanggan
+participant "Browser/Frontend" as FE
+participant "Express Server" as Server
+database "MySQL DB (XAMPP)" as DB
+actor Administrator
+
+Pelanggan -> FE: Pilih Paket & Klik Pesan
+FE -> Server: POST /booking (Data Pemesanan)
+Server -> DB: INSERT INTO bookings (...)
+DB --> Server: Booking ID
+Server --> FE: Response (201 Created, Booking ID)
+
+FE -> Pelanggan: Tampilkan Detail Pembayaran & Form
+Pelanggan -> FE: Upload Bukti Bayar
+FE -> Server: POST /booking/id/payment (File + Data)
+Server -> DB: INSERT INTO payments (...)
+Server -> DB: UPDATE bookings SET status='waiting'
+DB --> Server: OK
+Server --> FE: Response (Menunggu Verifikasi)
+
+Administrator -> Server: GET /admin/bookings
+Server -> DB: SELECT * FROM bookings WHERE status='waiting'
+DB --> Server: Data Booking
+Server --> Administrator: Render Dashboard
+
+Administrator -> Server: POST /admin/booking/id/approve
+Server -> DB: UPDATE bookings SET status='approved'
+DB --> Server: OK
+Server --> Administrator: Response (Booking Disetujui)
+@enduml

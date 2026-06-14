@@ -1,0 +1,54 @@
+@startuml ERD_Booking_Online_Bromo
+
+' Konfigurasi Tampilan
+skinparam monochrome true
+skinparam linetype ortho
+
+entity "User" {
+    * id_user : INT <<PK>>
+    --
+    * nama : VARCHAR
+    * email : VARCHAR <<UNIQUE>>
+    * password : VARCHAR
+    * no_telepon : VARCHAR
+    * role : ENUM('admin', 'customer')
+}
+
+entity "Package" {
+    * id_package : INT <<PK>>
+    --
+    * nama_paket : VARCHAR
+    * deskripsi : TEXT
+    * harga : INT
+    * fasilitas : TEXT
+    * kuota_maksimal : INT
+}
+
+entity "Booking" {
+    * id_booking : INT <<PK>>
+    --
+    * id_user : INT <<FK>>
+    * id_package : INT <<FK>>
+    * tanggal_booking : DATE
+    * tanggal_wisata : DATE
+    * jumlah_peserta : INT
+    * total_harga : INT
+    * status_booking : ENUM('pending', 'confirmed', 'cancelled', 'completed')
+}
+
+entity "Payment" {
+    * id_payment : INT <<PK>>
+    --
+    * id_booking : INT <<FK, UNIQUE>>
+    * metode_pembayaran : VARCHAR
+    * bukti_transfer : VARCHAR
+    * tanggal_pembayaran : DATETIME
+    * status_pembayaran : ENUM('unpaid', 'pending', 'paid', 'rejected')
+}
+
+' Relasi antar entitas
+User ||--o{ Booking : "melakukan"
+Package ||--o{ Booking : "dipilih pada"
+Booking ||--|| Payment : "memiliki"
+
+@enduml
